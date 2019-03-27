@@ -1,0 +1,64 @@
+{{- if .Values.s3.enabled -}}
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  labels:
+    {{- include "cortex.s3.labels" . | nindent 4 }}
+  name: {{ template "cortex.s3.fullname" . }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "cortex.s3.matchLabels" . | nindent 6 }}
+  replicas: 1
+  {{- if .Values.s3.strategy }}
+  strategy:
+{{ toYaml .Values.s3.strategy | indent 4 }}
+  {{- end }}
+  template:
+    metadata:
+    {{- if .Values.s3.podAnnotations }}
+      annotations:
+{{ toYaml .Values.s3.podAnnotations | indent 8 }}
+    {{- end }}
+      labels:
+        {{- include "cortex.s3.labels" . | nindent 8 }}
+    spec:
+{{- if .Values.s3.schedulerName }}
+      schedulerName: "{{ .Values.s3.schedulerName }}"
+{{- end }}
+{{- if .Values.s3.priorityClassName }}
+      priorityClassName: "{{ .Values.s3.priorityClassName }}"
+{{- end }}
+      containers:
+        - name: {{ template "cortex.name" . }}-{{ .Values.s3.name }}
+          image: "{{ .Values.s3.image.repository }}:{{ .Values.s3.image.tag }}"
+          imagePullPolicy: {{ .Values.s3.image.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.s3.service.port }}
+          # livenessProbe:
+          #   httpGet:
+          #     path: /
+          #     port: http
+          # readinessProbe:
+          #   httpGet:
+          #     path: /
+          #     port: http
+          resources:
+{{ toYaml .Values.s3.resources | indent 12 }}
+{{- if .Values.s3.affinity }}
+      affinity:
+{{ toYaml .Values.s3.affinity | indent 8 }}
+{{- end }}
+    {{- if .Values.s3.nodeSelector }}
+      nodeSelector:
+{{ toYaml .Values.s3.nodeSelector | indent 8 }}
+    {{- end }}
+    {{- if .Values.s3.securityContext }}
+      securityContext:
+{{ toYaml .Values.s3.securityContext | indent 8 }}
+    {{- end }}
+    {{- if .Values.s3.tolerations }}
+      tolerations:
+{{ toYaml .Values.s3.tolerations | indent 8 }}
+    {{- end }}
+{{- end }}

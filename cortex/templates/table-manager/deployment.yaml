@@ -1,0 +1,69 @@
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  labels:
+    {{- include "cortex.tableManager.labels" . | nindent 4 }}
+  name: {{ template "cortex.tableManager.fullname" . }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "cortex.tableManager.matchLabels" . | nindent 6 }}
+  replicas: 1
+  {{- if .Values.tableManager.strategy }}
+  strategy:
+{{ toYaml .Values.tableManager.strategy | indent 4 }}
+  {{- end }}
+  template:
+    metadata:
+    {{- if .Values.tableManager.podAnnotations }}
+      annotations:
+{{ toYaml .Values.tableManager.podAnnotations | indent 8 }}
+    {{- end }}
+      labels:
+        {{- include "cortex.tableManager.labels" . | nindent 8 }}
+    spec:
+{{- if .Values.tableManager.schedulerName }}
+      schedulerName: "{{ .Values.tableManager.schedulerName }}"
+{{- end }}
+{{- if .Values.tableManager.priorityClassName }}
+      priorityClassName: "{{ .Values.tableManager.priorityClassName }}"
+{{- end }}
+      containers:
+        - name: {{ template "cortex.name" . }}-{{ .Values.tableManager.name }}
+          image: "{{ .Values.tableManager.image.repository }}:{{ tpl .Values.tableManager.image.tag . }}"
+          imagePullPolicy: {{ .Values.tableManager.image.pullPolicy }}
+          args:
+          - -server.http-listen-port=80
+          - -dynamodb.original-table-name=cortex
+          - -dynamodb.url=dynamodb://user:pass@{{ template "cortex.dynamodb.fullname" . }}.{{ .Release.Namespace }}:{{ .Values.dynamodb.service.port }}
+          - -dynamodb.periodic-table.prefix=cortex_weekly_
+          - -dynamodb.periodic-table.from=2017-01-06
+          - -dynamodb.chunk-table.from=2017-04-17
+          ports:
+            - containerPort: 80
+          # livenessProbe:
+          #   httpGet:
+          #     path: /
+          #     port: http
+          # readinessProbe:
+          #   httpGet:
+          #     path: /
+          #     port: http
+          resources:
+{{ toYaml .Values.tableManager.resources | indent 12 }}
+{{- if .Values.tableManager.affinity }}
+      affinity:
+{{ toYaml .Values.tableManager.affinity | indent 8 }}
+{{- end }}
+    {{- if .Values.tableManager.nodeSelector }}
+      nodeSelector:
+{{ toYaml .Values.tableManager.nodeSelector | indent 8 }}
+    {{- end }}
+    {{- if .Values.tableManager.securityContext }}
+      securityContext:
+{{ toYaml .Values.tableManager.securityContext | indent 8 }}
+    {{- end }}
+    {{- if .Values.tableManager.tolerations }}
+      tolerations:
+{{ toYaml .Values.tableManager.tolerations | indent 8 }}
+    {{- end }}

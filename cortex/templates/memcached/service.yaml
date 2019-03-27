@@ -1,0 +1,23 @@
+{{- if .Values.memcached.enabled -}}
+apiVersion: v1
+kind: Service
+metadata:
+{{- if .Values.memcached.service.annotations }}
+  annotations:
+{{ toYaml .Values.memcached.service.annotations | indent 4 }}
+{{- end }}
+  labels:
+    {{- include "cortex.memcached.labels" . | nindent 4 }}
+{{- if .Values.memcached.service.labels }}
+{{ toYaml .Values.memcached.service.labels | indent 4 }}
+{{- end }}
+  name: {{ template "cortex.memcached.fullname" . }}
+spec:
+  clusterIP: None
+  ports:
+    - name: memcached
+      port: {{ .Values.memcached.service.port }}
+      targetPort: memcached
+  selector:
+    {{- include "cortex.memcached.matchLabels" . | nindent 4 }}
+{{- end }}

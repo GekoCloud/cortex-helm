@@ -1,0 +1,551 @@
+# Default values for cortex.
+
+consul:
+  HttpPort: 8500
+
+  ## If false, consul will not be installed
+  ##
+  enabled: true
+
+  ## consul container name
+  ##
+  name: consul
+
+  ## consul container image
+  ##
+  image:
+    repository: consul
+    tag: 1.4.4
+    pullPolicy: IfNotPresent
+
+  ## consul priorityClassName
+  ##
+  priorityClassName: ""
+
+  ## Node tolerations for consul scheduling to nodes with taints
+  ## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/
+  ##
+  tolerations: []
+    # - key: "key"
+    #   operator: "Equal|Exists"
+    #   value: "value"
+    #   effect: "NoSchedule|PreferNoSchedule|NoExecute(1.6 only)"
+
+  ## Node labels for consul pod assignment
+  ## Ref: https://kubernetes.io/docs/user-guide/node-selection/
+  ##
+  nodeSelector: {}
+
+  ## Pod affinity
+  ##
+  affinity: {}
+
+  ## Use an alternate scheduler, e.g. "stork".
+  ## ref: https://kubernetes.io/docs/tasks/administer-cluster/configure-multiple-schedulers/
+  ##
+  # schedulerName:
+
+  ## consul Deployment Strategy type
+  # strategy:
+  #   type: Recreate
+
+  ## Annotations to be added to consul pods
+  ##
+  podAnnotations: {}
+
+  service:
+    annotations: {}
+    labels: {}
+
+distributor:
+  ## distributor container name
+  ##
+  name: distributor
+
+  ## distributor container image
+  ##
+  image:
+    repository: quay.io/cortexproject/distributor
+    tag: "{{ .Chart.AppVersion }}"
+    pullPolicy: IfNotPresent
+
+  ## distributor priorityClassName
+  ##
+  priorityClassName: ""
+
+  ## Node tolerations for distributor scheduling to nodes with taints
+  ## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/
+  ##
+  tolerations: []
+    # - key: "key"
+    #   operator: "Equal|Exists"
+    #   value: "value"
+    #   effect: "NoSchedule|PreferNoSchedule|NoExecute(1.6 only)"
+
+  ## Node labels for distributor pod assignment
+  ## Ref: https://kubernetes.io/docs/user-guide/node-selection/
+  ##
+  nodeSelector: {}
+
+  ## Pod affinity
+  ##
+  affinity: {}
+
+  ## Use an alternate scheduler, e.g. "stork".
+  ## ref: https://kubernetes.io/docs/tasks/administer-cluster/configure-multiple-schedulers/
+  ##
+  # schedulerName:
+
+  ## distributor Deployment Strategy type
+  # strategy:
+  #   rollingUpdate:
+  #     maxSurge: 0
+  #     maxUnavailable: 1
+
+  ## Annotations to be added to distributor pods
+  ##
+  podAnnotations: {}
+
+  service:
+    port: 80
+    annotations: {}
+    labels: {}
+
+dynamodb:
+  ## If false, dynamodb will not be installed
+  ##
+  enabled: true
+
+  ## dynamodb container name
+  ##
+  name: dynamodb
+
+  ## dynamodb container image
+  ##
+  image:
+    repository: amazon/dynamodb-local
+    tag: latest
+    pullPolicy: IfNotPresent
+
+  ## dynamodb priorityClassName
+  ##
+  priorityClassName: ""
+
+  ## Node tolerations for dynamodb scheduling to nodes with taints
+  ## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/
+  ##
+  tolerations: []
+    # - key: "key"
+    #   operator: "Equal|Exists"
+    #   value: "value"
+    #   effect: "NoSchedule|PreferNoSchedule|NoExecute(1.6 only)"
+
+  ## Node labels for dynamodb pod assignment
+  ## Ref: https://kubernetes.io/docs/user-guide/node-selection/
+  ##
+  nodeSelector: {}
+
+  ## Pod affinity
+  ##
+  affinity: {}
+
+  ## Use an alternate scheduler, e.g. "stork".
+  ## ref: https://kubernetes.io/docs/tasks/administer-cluster/configure-multiple-schedulers/
+  ##
+  # schedulerName:
+
+  ## dynamodb Deployment Strategy type
+  # strategy:
+  #   type: Recreate
+
+  ## Annotations to be added to dynamodb pods
+  ##
+  podAnnotations:
+    prometheus.io.scrape: "false"
+
+  service:
+    port: 8000
+    annotations: {}
+    labels: {}
+
+ingester:
+  ## ingester container name
+  ##
+  name: ingester
+
+  ## ingester container image
+  ##
+  image:
+    repository: quay.io/cortexproject/ingester
+    tag: "{{ .Chart.AppVersion }}"
+    pullPolicy: IfNotPresent
+
+  ## ingester priorityClassName
+  ##
+  priorityClassName: ""
+
+  ## Node tolerations for ingester scheduling to nodes with taints
+  ## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/
+  ##
+  tolerations: []
+    # - key: "key"
+    #   operator: "Equal|Exists"
+    #   value: "value"
+    #   effect: "NoSchedule|PreferNoSchedule|NoExecute(1.6 only)"
+
+  ## Node labels for ingester pod assignment
+  ## Ref: https://kubernetes.io/docs/user-guide/node-selection/
+  ##
+  nodeSelector: {}
+
+  ## Pod affinity
+  ##
+  affinity: {}
+
+  ## Use an alternate scheduler, e.g. "stork".
+  ## ref: https://kubernetes.io/docs/tasks/administer-cluster/configure-multiple-schedulers/
+  ##
+  # schedulerName:
+
+  ## ingester Deployment Strategy type
+  strategy:
+    rollingUpdate:
+      maxSurge: 0
+      maxUnavailable: 1
+
+  ## Annotations to be added to ingester pods
+  ##
+  podAnnotations: {}
+
+  service:
+    port: 80
+    annotations: {}
+    labels: {}
+
+memcached:
+  ## If false, memcached will not be installed
+  ##
+  enabled: true
+
+  ## memcached container name
+  ##
+  name: memcached
+
+  ## memcached container image
+  ##
+  image:
+    repository: memcached
+    tag: 1.4.25
+    pullPolicy: IfNotPresent
+
+  ## memcached priorityClassName
+  ##
+  priorityClassName: ""
+
+  ## Node tolerations for memcached scheduling to nodes with taints
+  ## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/
+  ##
+  tolerations: []
+    # - key: "key"
+    #   operator: "Equal|Exists"
+    #   value: "value"
+    #   effect: "NoSchedule|PreferNoSchedule|NoExecute(1.6 only)"
+
+  ## Node labels for memcached pod assignment
+  ## Ref: https://kubernetes.io/docs/user-guide/node-selection/
+  ##
+  nodeSelector: {}
+
+  ## Pod affinity
+  ##
+  affinity: {}
+
+  ## Use an alternate scheduler, e.g. "stork".
+  ## ref: https://kubernetes.io/docs/tasks/administer-cluster/configure-multiple-schedulers/
+  ##
+  # schedulerName:
+
+  ## memcached Deployment Strategy type
+  # strategy:
+  #   type: Recreate
+
+  ## Annotations to be added to memcached pods
+  ##
+  podAnnotations:
+    prometheus.io.scrape: "false"
+
+  service:
+    port: 11211
+    annotations: {}
+    labels: {}
+
+querier:
+  ## querier container name
+  ##
+  name: querier
+
+  ## querier container image
+  ##
+  image:
+    repository: quay.io/cortexproject/querier
+    tag: "{{ .Chart.AppVersion }}"
+    pullPolicy: IfNotPresent
+
+  ## querier priorityClassName
+  ##
+  priorityClassName: ""
+
+  ## Node tolerations for querier scheduling to nodes with taints
+  ## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/
+  ##
+  tolerations: []
+    # - key: "key"
+    #   operator: "Equal|Exists"
+    #   value: "value"
+    #   effect: "NoSchedule|PreferNoSchedule|NoExecute(1.6 only)"
+
+  ## Node labels for querier pod assignment
+  ## Ref: https://kubernetes.io/docs/user-guide/node-selection/
+  ##
+  nodeSelector: {}
+
+  ## Pod affinity
+  ##
+  affinity: {}
+
+  ## Use an alternate scheduler, e.g. "stork".
+  ## ref: https://kubernetes.io/docs/tasks/administer-cluster/configure-multiple-schedulers/
+  ##
+  # schedulerName:
+
+  ## querier Deployment Strategy type
+  # strategy:
+  #   rollingUpdate:
+  #     maxSurge: 0
+  #     maxUnavailable: 1
+
+  ## Annotations to be added to querier pods
+  ##
+  podAnnotations: {}
+
+  service:
+    port: 80
+    annotations: {}
+    labels: {}
+
+queryFrontend:
+  ## query-frontend container name
+  ##
+  name: query-frontend
+
+  ## query-frontend container image
+  ##
+  image:
+    repository: quay.io/cortexproject/query-frontend
+    tag: "{{ .Chart.AppVersion }}"
+    pullPolicy: IfNotPresent
+
+  ## query-frontend priorityClassName
+  ##
+  priorityClassName: ""
+
+  ## Node tolerations for query-frontend scheduling to nodes with taints
+  ## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/
+  ##
+  tolerations: []
+    # - key: "key"
+    #   operator: "Equal|Exists"
+    #   value: "value"
+    #   effect: "NoSchedule|PreferNoSchedule|NoExecute(1.6 only)"
+
+  ## Node labels for query-frontend pod assignment
+  ## Ref: https://kubernetes.io/docs/user-guide/node-selection/
+  ##
+  nodeSelector: {}
+
+  ## Pod affinity
+  ##
+  affinity: {}
+
+  ## Use an alternate scheduler, e.g. "stork".
+  ## ref: https://kubernetes.io/docs/tasks/administer-cluster/configure-multiple-schedulers/
+  ##
+  # schedulerName:
+
+  ## query-frontend Deployment Strategy type
+  # strategy:
+  #   rollingUpdate:
+  #     maxSurge: 0
+  #     maxUnavailable: 1
+
+  ## Annotations to be added to query-frontend pods
+  ##
+  podAnnotations: {}
+
+  service:
+    httpPort: 80
+    grpcPort: 9095
+    annotations: {}
+    labels: {}
+
+ruler:
+  ## ruler container name
+  ##
+  name: ruler
+
+  ## ruler container image
+  ##
+  image:
+    repository: quay.io/cortexproject/ruler
+    tag: "{{ .Chart.AppVersion }}"
+    pullPolicy: IfNotPresent
+
+  ## ruler priorityClassName
+  ##
+  priorityClassName: ""
+
+  ## Node tolerations for ruler scheduling to nodes with taints
+  ## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/
+  ##
+  tolerations: []
+    # - key: "key"
+    #   operator: "Equal|Exists"
+    #   value: "value"
+    #   effect: "NoSchedule|PreferNoSchedule|NoExecute(1.6 only)"
+
+  ## Node labels for ruler pod assignment
+  ## Ref: https://kubernetes.io/docs/user-guide/node-selection/
+  ##
+  nodeSelector: {}
+
+  ## Pod affinity
+  ##
+  affinity: {}
+
+  ## Use an alternate scheduler, e.g. "stork".
+  ## ref: https://kubernetes.io/docs/tasks/administer-cluster/configure-multiple-schedulers/
+  ##
+  # schedulerName:
+
+  ## ruler Deployment Strategy type
+  # strategy:
+  #   rollingUpdate:
+  #     maxSurge: 0
+  #     maxUnavailable: 1
+
+  ## Annotations to be added to ruler pods
+  ##
+  podAnnotations: {}
+
+  service:
+    port: 80
+    annotations: {}
+    labels: {}
+
+s3:
+  ## If false, s3 will not be installed
+  ##
+  enabled: true
+
+  ## s3 container name
+  ##
+  name: s3
+
+  ## s3 container image
+  ##
+  image:
+    repository: lphoward/fake-s3
+    tag: latest
+    pullPolicy: IfNotPresent
+
+  ## s3 priorityClassName
+  ##
+  priorityClassName: ""
+
+  ## Node tolerations for s3 scheduling to nodes with taints
+  ## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/
+  ##
+  tolerations: []
+    # - key: "key"
+    #   operator: "Equal|Exists"
+    #   value: "value"
+    #   effect: "NoSchedule|PreferNoSchedule|NoExecute(1.6 only)"
+
+  ## Node labels for s3 pod assignment
+  ## Ref: https://kubernetes.io/docs/user-guide/node-selection/
+  ##
+  nodeSelector: {}
+
+  ## Pod affinity
+  ##
+  affinity: {}
+
+  ## Use an alternate scheduler, e.g. "stork".
+  ## ref: https://kubernetes.io/docs/tasks/administer-cluster/configure-multiple-schedulers/
+  ##
+  # schedulerName:
+
+  ## s3 Deployment Strategy type
+  # strategy:
+  #   type: Recreate
+
+  ## Annotations to be added to s3 pods
+  ##
+  podAnnotations:
+    prometheus.io.scrape: "false"
+
+  service:
+    port: 4569
+    annotations: {}
+    labels: {}
+
+tableManager:
+  ## table-manager container name
+  ##
+  name: table-manager
+
+  ## table-manager container image
+  ##
+  image:
+    repository: quay.io/cortexproject/table-manager
+    tag: "{{ .Chart.AppVersion }}"
+    pullPolicy: IfNotPresent
+
+  ## table-manager priorityClassName
+  ##
+  priorityClassName: ""
+
+  ## Node tolerations for table-manager scheduling to nodes with taints
+  ## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/
+  ##
+  tolerations: []
+    # - key: "key"
+    #   operator: "Equal|Exists"
+    #   value: "value"
+    #   effect: "NoSchedule|PreferNoSchedule|NoExecute(1.6 only)"
+
+  ## Node labels for table-manager pod assignment
+  ## Ref: https://kubernetes.io/docs/user-guide/node-selection/
+  ##
+  nodeSelector: {}
+
+  ## Pod affinity
+  ##
+  affinity: {}
+
+  ## Use an alternate scheduler, e.g. "stork".
+  ## ref: https://kubernetes.io/docs/tasks/administer-cluster/configure-multiple-schedulers/
+  ##
+  # schedulerName:
+
+  ## table-manager Deployment Strategy type
+  # strategy:
+  #   type: Recreate
+
+  ## Annotations to be added to table-manager pods
+  ##
+  podAnnotations: {}
+
+  service:
+    annotations: {}
+    labels: {}

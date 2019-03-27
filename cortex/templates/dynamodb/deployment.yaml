@@ -1,0 +1,64 @@
+{{- if .Values.dynamodb.enabled -}}
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  labels:
+    {{- include "cortex.dynamodb.labels" . | nindent 4 }}
+  name: {{ template "cortex.dynamodb.fullname" . }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "cortex.dynamodb.matchLabels" . | nindent 6 }}
+  replicas: 1
+  {{- if .Values.dynamodb.strategy }}
+  strategy:
+{{ toYaml .Values.dynamodb.strategy | indent 4 }}
+  {{- end }}
+  template:
+    metadata:
+    {{- if .Values.dynamodb.podAnnotations }}
+      annotations:
+{{ toYaml .Values.dynamodb.podAnnotations | indent 8 }}
+    {{- end }}
+      labels:
+        {{- include "cortex.dynamodb.labels" . | nindent 8 }}
+    spec:
+{{- if .Values.dynamodb.schedulerName }}
+      schedulerName: "{{ .Values.dynamodb.schedulerName }}"
+{{- end }}
+{{- if .Values.dynamodb.priorityClassName }}
+      priorityClassName: "{{ .Values.dynamodb.priorityClassName }}"
+{{- end }}
+      containers:
+        - name: {{ template "cortex.name" . }}-{{ .Values.dynamodb.name }}
+          image: "{{ .Values.dynamodb.image.repository }}:{{ .Values.dynamodb.image.tag }}"
+          imagePullPolicy: {{ .Values.dynamodb.image.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.dynamodb.service.port }}
+          # livenessProbe:
+          #   httpGet:
+          #     path: /
+          #     port: http
+          # readinessProbe:
+          #   httpGet:
+          #     path: /
+          #     port: http
+          resources:
+{{ toYaml .Values.dynamodb.resources | indent 12 }}
+{{- if .Values.dynamodb.affinity }}
+      affinity:
+{{ toYaml .Values.dynamodb.affinity | indent 8 }}
+{{- end }}
+    {{- if .Values.dynamodb.nodeSelector }}
+      nodeSelector:
+{{ toYaml .Values.dynamodb.nodeSelector | indent 8 }}
+    {{- end }}
+    {{- if .Values.dynamodb.securityContext }}
+      securityContext:
+{{ toYaml .Values.dynamodb.securityContext | indent 8 }}
+    {{- end }}
+    {{- if .Values.dynamodb.tolerations }}
+      tolerations:
+{{ toYaml .Values.dynamodb.tolerations | indent 8 }}
+    {{- end }}
+{{- end }}

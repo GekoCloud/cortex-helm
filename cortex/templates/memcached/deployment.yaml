@@ -1,0 +1,67 @@
+{{- if .Values.memcached.enabled -}}
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  labels:
+    {{- include "cortex.memcached.labels" . | nindent 4 }}
+  name: {{ template "cortex.memcached.fullname" . }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "cortex.memcached.matchLabels" . | nindent 6 }}
+  replicas: 1
+  {{- if .Values.memcached.strategy }}
+  strategy:
+{{ toYaml .Values.memcached.strategy | indent 4 }}
+  {{- end }}
+  template:
+    metadata:
+    {{- if .Values.memcached.podAnnotations }}
+      annotations:
+{{ toYaml .Values.memcached.podAnnotations | indent 8 }}
+    {{- end }}
+      labels:
+        {{- include "cortex.memcached.labels" . | nindent 8 }}
+    spec:
+{{- if .Values.memcached.schedulerName }}
+      schedulerName: "{{ .Values.memcached.schedulerName }}"
+{{- end }}
+{{- if .Values.memcached.priorityClassName }}
+      priorityClassName: "{{ .Values.memcached.priorityClassName }}"
+{{- end }}
+      containers:
+        - name: {{ template "cortex.name" . }}-{{ .Values.memcached.name }}
+          image: "{{ .Values.memcached.image.repository }}:{{ .Values.memcached.image.tag }}"
+          imagePullPolicy: {{ .Values.memcached.image.pullPolicy }}
+          ports:
+            - name: memcached
+              containerPort: {{ .Values.memcached.service.port }}
+          livenessProbe:
+            tcpSocket:
+              port: memcached
+            initialDelaySeconds: 30
+            timeoutSeconds: 5
+          readinessProbe:
+            tcpSocket:
+              port: memcached
+            initialDelaySeconds: 5
+            timeoutSeconds: 1
+          resources:
+{{ toYaml .Values.memcached.resources | indent 12 }}
+{{- if .Values.memcached.affinity }}
+      affinity:
+{{ toYaml .Values.memcached.affinity | indent 8 }}
+{{- end }}
+    {{- if .Values.memcached.nodeSelector }}
+      nodeSelector:
+{{ toYaml .Values.memcached.nodeSelector | indent 8 }}
+    {{- end }}
+    {{- if .Values.memcached.securityContext }}
+      securityContext:
+{{ toYaml .Values.memcached.securityContext | indent 8 }}
+    {{- end }}
+    {{- if .Values.memcached.tolerations }}
+      tolerations:
+{{ toYaml .Values.memcached.tolerations | indent 8 }}
+    {{- end }}
+{{- end }}

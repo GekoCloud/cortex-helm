@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Service
+metadata:
+{{- if .Values.querier.service.annotations }}
+  annotations:
+{{ toYaml .Values.querier.service.annotations | indent 4 }}
+{{- end }}
+  labels:
+    {{- include "cortex.querier.labels" . | nindent 4 }}
+{{- if .Values.querier.service.labels }}
+{{ toYaml .Values.querier.service.labels | indent 4 }}
+{{- end }}
+  name: {{ template "cortex.querier.fullname" . }}
+spec:
+  ports:
+    - name: http
+      port: {{ .Values.querier.service.port }}
+      targetPort: http
+  selector:
+    {{- include "cortex.querier.matchLabels" . | nindent 4 }}

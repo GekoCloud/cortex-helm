@@ -1,0 +1,21 @@
+{{- if .Values.consul.enabled -}}
+apiVersion: v1
+kind: Service
+metadata:
+{{- if .Values.consul.service.annotations }}
+  annotations:
+{{ toYaml .Values.consul.service.annotations | indent 4 }}
+{{- end }}
+  labels:
+    {{- include "cortex.consul.labels" . | nindent 4 }}
+{{- if .Values.consul.service.labels }}
+{{ toYaml .Values.consul.service.labels | indent 4 }}
+{{- end }}
+  name: {{ template "cortex.consul.fullname" . }}
+spec:
+  ports:
+    - name: http
+      port: {{ .Values.consul.HttpPort }}
+  selector:
+    {{- include "cortex.consul.matchLabels" . | nindent 4 }}
+{{- end }}

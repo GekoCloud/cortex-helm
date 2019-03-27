@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Service
+metadata:
+{{- if .Values.ruler.service.annotations }}
+  annotations:
+{{ toYaml .Values.ruler.service.annotations | indent 4 }}
+{{- end }}
+  labels:
+    {{- include "cortex.ruler.labels" . | nindent 4 }}
+{{- if .Values.ruler.service.labels }}
+{{ toYaml .Values.ruler.service.labels | indent 4 }}
+{{- end }}
+  name: {{ template "cortex.ruler.fullname" . }}
+spec:
+  ports:
+    - name: http
+      port: {{ .Values.ruler.service.port }}
+      targetPort: http
+  selector:
+    {{- include "cortex.ruler.matchLabels" . | nindent 4 }}

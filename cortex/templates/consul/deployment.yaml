@@ -1,0 +1,84 @@
+{{- if .Values.consul.enabled -}}
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  labels:
+    {{- include "cortex.consul.labels" . | nindent 4 }}
+  name: {{ template "cortex.consul.fullname" . }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "cortex.consul.matchLabels" . | nindent 6 }}
+  replicas: 1
+  {{- if .Values.consul.strategy }}
+  strategy:
+{{ toYaml .Values.consul.strategy | indent 4 }}
+  {{- end }}
+  template:
+    metadata:
+    {{- if .Values.consul.podAnnotations }}
+      annotations:
+{{ toYaml .Values.consul.podAnnotations | indent 8 }}
+    {{- end }}
+      labels:
+        {{- include "cortex.consul.labels" . | nindent 8 }}
+    spec:
+{{- if .Values.consul.schedulerName }}
+      schedulerName: "{{ .Values.consul.schedulerName }}"
+{{- end }}
+{{- if .Values.consul.priorityClassName }}
+      priorityClassName: "{{ .Values.consul.priorityClassName }}"
+{{- end }}
+      containers:
+        - name: {{ template "cortex.name" . }}-{{ .Values.consul.name }}
+          image: "{{ .Values.consul.image.repository }}:{{ .Values.consul.image.tag }}"
+          imagePullPolicy: {{ .Values.consul.image.pullPolicy }}
+          args:
+            - agent
+            - -ui
+            - -server
+            - -client=0.0.0.0
+            - -bootstrap
+          env:
+            - name: CHECKPOINT_DISABLE
+              value: "1"
+          ports:
+            - name: server-noscrape
+              containerPort: 8300
+            - name: serf-noscrape
+              containerPort: 8301
+            - name: client-noscrape
+              containerPort: 8400
+            - name: http-noscrape
+              containerPort: {{ .Values.consul.HttpPort }}
+          livenessProbe:
+            exec:
+              command:
+              - consul
+              - members
+              - -http-addr=http://127.0.0.1:{{ .Values.consul.HttpPort }}
+            initialDelaySeconds: 300
+            timeoutSeconds: 5
+          # readinessProbe:
+          #   httpGet:
+          #     path: /
+          #     port: http
+          resources:
+{{ toYaml .Values.consul.resources | indent 12 }}
+{{- if .Values.consul.affinity }}
+      affinity:
+{{ toYaml .Values.consul.affinity | indent 8 }}
+{{- end }}
+    {{- if .Values.consul.nodeSelector }}
+      nodeSelector:
+{{ toYaml .Values.consul.nodeSelector | indent 8 }}
+    {{- end }}
+    {{- if .Values.consul.securityContext }}
+      securityContext:
+{{ toYaml .Values.consul.securityContext | indent 8 }}
+    {{- end }}
+    {{- if .Values.consul.tolerations }}
+      tolerations:
+{{ toYaml .Values.consul.tolerations | indent 8 }}
+    {{- end }}
+{{- end }}

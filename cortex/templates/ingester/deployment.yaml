@@ -1,0 +1,93 @@
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  labels:
+    {{- include "cortex.ingester.labels" . | nindent 4 }}
+  name: {{ template "cortex.ingester.fullname" . }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "cortex.ingester.matchLabels" . | nindent 6 }}
+  replicas: 1
+  # Ingesters are not ready for at least 1 min
+  # after creation.  This has to be in sync with
+  # the ring timeout value, as this will stop a
+  # stampede of new ingesters if we should loose
+  # some.
+  minReadySeconds: 60
+  {{- if .Values.ingester.strategy }}
+  strategy:
+{{ toYaml .Values.ingester.strategy | indent 4 }}
+  {{- end }}
+  template:
+    metadata:
+    {{- if .Values.ingester.podAnnotations }}
+      annotations:
+{{ toYaml .Values.ingester.podAnnotations | indent 8 }}
+    {{- end }}
+      labels:
+        {{- include "cortex.ingester.labels" . | nindent 8 }}
+    spec:
+      # Give ingesters 40 minutes grace to flush chunks and exit cleanly.
+      # Service is available during this time, as long as we don't stop
+      # too many ingesters at once.
+      terminationGracePeriodSeconds: 2400
+{{- if .Values.ingester.schedulerName }}
+      schedulerName: "{{ .Values.ingester.schedulerName }}"
+{{- end }}
+{{- if .Values.ingester.priorityClassName }}
+      priorityClassName: "{{ .Values.ingester.priorityClassName }}"
+{{- end }}
+      containers:
+        - name: {{ template "cortex.name" . }}-{{ .Values.ingester.name }}
+          image: "{{ .Values.ingester.image.repository }}:{{ tpl .Values.ingester.image.tag . }}"
+          imagePullPolicy: {{ .Values.ingester.image.pullPolicy }}
+          args:
+            - -ingester.join-after=30s
+            - -ingester.claim-on-rollout=true
+            - -consul.hostname={{ template "cortex.consul.fullname" . }}.{{ .Release.Namespace }}:{{ .Values.consul.HttpPort }}
+            - -s3.url=s3://abc:123@{{ template "cortex.s3.fullname" . }}.{{ .Release.Namespace }}:{{ .Values.s3.service.port }}
+            - -dynamodb.original-table-name=cortex
+            - -dynamodb.url=dynamodb://user:pass@{{ template "cortex.dynamodb.fullname" . }}.{{ .Release.Namespace }}:{{ .Values.dynamodb.service.port }}
+            - -dynamodb.periodic-table.prefix=cortex_weekly_
+            - -dynamodb.periodic-table.from=2017-01-06
+            - -dynamodb.daily-buckets-from=2017-01-10
+            - -dynamodb.base64-buckets-from=2017-01-17
+            - -dynamodb.v4-schema-from=2017-02-05
+            - -dynamodb.v5-schema-from=2017-02-22
+            - -dynamodb.v6-schema-from=2017-03-19
+            - -dynamodb.chunk-table.from=2017-04-17
+            - -memcached.hostname={{ template "cortex.memcached.fullname" . }}.{{ .Release.Namespace }}
+            - -memcached.timeout=100ms
+            - -memcached.service=memcached
+          ports:
+            - name: http
+              containerPort: {{ .Values.ingester.service.port }}
+          # livenessProbe:
+          #   httpGet:
+          #     path: /
+          #     port: http
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: http
+            initialDelaySeconds: 15
+            timeoutSeconds: 1
+          resources:
+{{ toYaml .Values.ingester.resources | indent 12 }}
+{{- if .Values.ingester.affinity }}
+      affinity:
+{{ toYaml .Values.ingester.affinity | indent 8 }}
+{{- end }}
+    {{- if .Values.ingester.nodeSelector }}
+      nodeSelector:
+{{ toYaml .Values.ingester.nodeSelector | indent 8 }}
+    {{- end }}
+    {{- if .Values.ingester.securityContext }}
+      securityContext:
+{{ toYaml .Values.ingester.securityContext | indent 8 }}
+    {{- end }}
+    {{- if .Values.ingester.tolerations }}
+      tolerations:
+{{ toYaml .Values.ingester.tolerations | indent 8 }}
+    {{- end }}

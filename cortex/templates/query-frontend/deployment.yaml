@@ -1,0 +1,71 @@
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  labels:
+    {{- include "cortex.queryFrontend.labels" . | nindent 4 }}
+  name: {{ template "cortex.queryFrontend.fullname" . }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "cortex.queryFrontend.matchLabels" . | nindent 6 }}
+  replicas: 1
+  {{- if .Values.queryFrontend.strategy }}
+  strategy:
+{{ toYaml .Values.queryFrontend.strategy | indent 4 }}
+  {{- end }}
+  template:
+    metadata:
+    {{- if .Values.queryFrontend.podAnnotations }}
+      annotations:
+{{ toYaml .Values.queryFrontend.podAnnotations | indent 8 }}
+    {{- end }}
+      labels:
+        {{- include "cortex.queryFrontend.labels" . | nindent 8 }}
+    spec:
+{{- if .Values.queryFrontend.schedulerName }}
+      schedulerName: "{{ .Values.queryFrontend.schedulerName }}"
+{{- end }}
+{{- if .Values.queryFrontend.priorityClassName }}
+      priorityClassName: "{{ .Values.queryFrontend.priorityClassName }}"
+{{- end }}
+      containers:
+        - name: {{ template "cortex.name" . }}-{{ .Values.queryFrontend.name }}
+          image: "{{ .Values.queryFrontend.image.repository }}:{{ tpl .Values.queryFrontend.image.tag . }}"
+          imagePullPolicy: {{ .Values.queryFrontend.image.pullPolicy }}
+          args:
+            - -log.level=debug
+            - -server.http-listen-port={{ .Values.queryFrontend.service.httpPort }}
+            - -server.grpc-listen-port={{ .Values.queryFrontend.service.grpcPort }}
+          ports:
+            - containerPort: {{ .Values.queryFrontend.service.grpcPort }}
+              name: grpc
+            - containerPort: {{ .Values.queryFrontend.service.httpPort }}
+              name: http
+          # livenessProbe:
+          #   httpGet:
+          #     path: /
+          #     port: http
+          # readinessProbe:
+          #   httpGet:
+          #     path: /ready
+          #     port: http
+          #   initialDelaySeconds: 15
+          #   timeoutSeconds: 1
+          resources:
+{{ toYaml .Values.queryFrontend.resources | indent 12 }}
+{{- if .Values.queryFrontend.affinity }}
+      affinity:
+{{ toYaml .Values.queryFrontend.affinity | indent 8 }}
+{{- end }}
+    {{- if .Values.queryFrontend.nodeSelector }}
+      nodeSelector:
+{{ toYaml .Values.queryFrontend.nodeSelector | indent 8 }}
+    {{- end }}
+    {{- if .Values.queryFrontend.securityContext }}
+      securityContext:
+{{ toYaml .Values.queryFrontend.securityContext | indent 8 }}
+    {{- end }}
+    {{- if .Values.queryFrontend.tolerations }}
+      tolerations:
+{{ toYaml .Values.queryFrontend.tolerations | indent 8 }}
+    {{- end }}

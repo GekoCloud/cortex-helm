@@ -1,0 +1,25 @@
+apiVersion: v1
+kind: Service
+metadata:
+{{- if .Values.queryFrontend.service.annotations }}
+  annotations:
+{{ toYaml .Values.queryFrontend.service.annotations | indent 4 }}
+{{- end }}
+  labels:
+    {{- include "cortex.queryFrontend.labels" . | nindent 4 }}
+{{- if .Values.queryFrontend.service.labels }}
+{{ toYaml .Values.queryFrontend.service.labels | indent 4 }}
+{{- end }}
+  name: {{ template "cortex.queryFrontend.fullname" . }}
+spec:
+  # clusterIP: None gives a "headless" service so DNS returns all endpoints.
+  clusterIP: None
+  ports:
+    - name: http
+      port: {{ .Values.queryFrontend.service.httpPort }}
+      targetPort: http
+    - name: grpc
+      port: {{ .Values.queryFrontend.service.grpcPort }}
+      targetPort: grpc
+  selector:
+    {{- include "cortex.queryFrontend.matchLabels" . | nindent 4 }}

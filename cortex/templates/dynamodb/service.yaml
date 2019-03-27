@@ -1,0 +1,20 @@
+{{- if .Values.dynamodb.enabled -}}
+apiVersion: v1
+kind: Service
+metadata:
+{{- if .Values.dynamodb.service.annotations }}
+  annotations:
+{{ toYaml .Values.dynamodb.service.annotations | indent 4 }}
+{{- end }}
+  labels:
+    {{- include "cortex.dynamodb.labels" . | nindent 4 }}
+{{- if .Values.dynamodb.service.labels }}
+{{ toYaml .Values.dynamodb.service.labels | indent 4 }}
+{{- end }}
+  name: {{ template "cortex.dynamodb.fullname" . }}
+spec:
+  ports:
+    - port: {{ .Values.dynamodb.service.port }}
+  selector:
+    {{- include "cortex.dynamodb.matchLabels" . | nindent 4 }}
+{{- end }}

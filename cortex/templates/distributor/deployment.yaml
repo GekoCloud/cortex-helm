@@ -1,0 +1,70 @@
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  labels:
+    {{- include "cortex.distributor.labels" . | nindent 4 }}
+  name: {{ template "cortex.distributor.fullname" . }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "cortex.distributor.matchLabels" . | nindent 6 }}
+  replicas: 1
+  {{- if .Values.distributor.strategy }}
+  strategy:
+{{ toYaml .Values.distributor.strategy | indent 4 }}
+  {{- end }}
+  template:
+    metadata:
+    {{- if .Values.distributor.podAnnotations }}
+      annotations:
+{{ toYaml .Values.distributor.podAnnotations | indent 8 }}
+    {{- end }}
+      labels:
+        {{- include "cortex.distributor.labels" . | nindent 8 }}
+    spec:
+{{- if .Values.distributor.schedulerName }}
+      schedulerName: "{{ .Values.distributor.schedulerName }}"
+{{- end }}
+{{- if .Values.distributor.priorityClassName }}
+      priorityClassName: "{{ .Values.distributor.priorityClassName }}"
+{{- end }}
+      containers:
+        - name: {{ template "cortex.name" . }}-{{ .Values.distributor.name }}
+          image: "{{ .Values.distributor.image.repository }}:{{ tpl .Values.distributor.image.tag . }}"
+          imagePullPolicy: {{ .Values.distributor.image.pullPolicy }}
+          args:
+            - -log.level=debug
+            - -server.http-listen-port={{ .Values.distributor.service.port }}
+            - -consul.hostname={{ template "cortex.consul.fullname" . }}.{{ .Release.Namespace }}:{{ .Values.consul.HttpPort }}
+            - -distributor.replication-factor=1
+          ports:
+            - name: http
+              containerPort: {{ .Values.distributor.service.port }}
+          # livenessProbe:
+          #   httpGet:
+          #     path: /
+          #     port: http
+          # readinessProbe:
+          #   httpGet:
+          #     path: /ready
+          #     port: http
+          #   initialDelaySeconds: 15
+          #   timeoutSeconds: 1
+          resources:
+{{ toYaml .Values.distributor.resources | indent 12 }}
+{{- if .Values.distributor.affinity }}
+      affinity:
+{{ toYaml .Values.distributor.affinity | indent 8 }}
+{{- end }}
+    {{- if .Values.distributor.nodeSelector }}
+      nodeSelector:
+{{ toYaml .Values.distributor.nodeSelector | indent 8 }}
+    {{- end }}
+    {{- if .Values.distributor.securityContext }}
+      securityContext:
+{{ toYaml .Values.distributor.securityContext | indent 8 }}
+    {{- end }}
+    {{- if .Values.distributor.tolerations }}
+      tolerations:
+{{ toYaml .Values.distributor.tolerations | indent 8 }}
+    {{- end }}
