@@ -1,0 +1,70 @@
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  labels:
+    {{- include "cortex.alertmanager.labels" . | nindent 4 }}
+  name: {{ template "cortex.alertmanager.fullname" . }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "cortex.alertmanager.matchLabels" . | nindent 6 }}
+  replicas: 1
+  {{- if .Values.alertmanager.strategy }}
+  strategy:
+{{ toYaml .Values.alertmanager.strategy | indent 4 }}
+  {{- end }}
+  template:
+    metadata:
+    {{- if .Values.alertmanager.podAnnotations }}
+      annotations:
+{{ toYaml .Values.alertmanager.podAnnotations | indent 8 }}
+    {{- end }}
+      labels:
+        {{- include "cortex.alertmanager.labels" . | nindent 8 }}
+    spec:
+{{- if .Values.alertmanager.schedulerName }}
+      schedulerName: "{{ .Values.alertmanager.schedulerName }}"
+{{- end }}
+{{- if .Values.alertmanager.priorityClassName }}
+      priorityClassName: "{{ .Values.alertmanager.priorityClassName }}"
+{{- end }}
+      containers:
+        - name: {{ template "cortex.name" . }}-{{ .Values.alertmanager.name }}
+          image: "{{ .Values.alertmanager.image.repository }}:{{ tpl .Values.alertmanager.image.tag . }}"
+          imagePullPolicy: {{ .Values.alertmanager.image.pullPolicy }}
+          args:
+            - -log.level=debug
+            - -server.http-listen-port={{ .Values.alertmanager.service.port }}
+            - -alertmanager.configs.url=http://{{ template "cortex.configs.fullname" . }}.{{ .Release.Namespace }}:{{ .Values.configs.service.port }}
+            - -alertmanager.web.external-url=/api/prom/alertmanager
+          ports:
+            - name: http
+              containerPort: {{ .Values.alertmanager.service.port }}
+          # livenessProbe:
+          #   httpGet:
+          #     path: /
+          #     port: http
+          # readinessProbe:
+          #   httpGet:
+          #     path: /ready
+          #     port: http
+          #   initialDelaySeconds: 15
+          #   timeoutSeconds: 1
+          resources:
+{{ toYaml .Values.alertmanager.resources | indent 12 }}
+{{- if .Values.alertmanager.affinity }}
+      affinity:
+{{ toYaml .Values.alertmanager.affinity | indent 8 }}
+{{- end }}
+    {{- if .Values.alertmanager.nodeSelector }}
+      nodeSelector:
+{{ toYaml .Values.alertmanager.nodeSelector | indent 8 }}
+    {{- end }}
+    {{- if .Values.alertmanager.securityContext }}
+      securityContext:
+{{ toYaml .Values.alertmanager.securityContext | indent 8 }}
+    {{- end }}
+    {{- if .Values.alertmanager.tolerations }}
+      tolerations:
+{{ toYaml .Values.alertmanager.tolerations | indent 8 }}
+    {{- end }}
