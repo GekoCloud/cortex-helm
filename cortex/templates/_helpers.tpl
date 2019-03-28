@@ -19,6 +19,26 @@ chart: {{ .Chart.Name }}-{{ .Chart.Version }}
 heritage: {{ .Release.Service }}
 {{- end -}}
 
+{{- define "cortex.configs.labels" -}}
+{{ include "cortex.configs.matchLabels" . }}
+{{ include "cortex.common.metaLabels" . }}
+{{- end -}}
+
+{{- define "cortex.configs.matchLabels" -}}
+component: {{ .Values.configs.name | quote }}
+{{ include "cortex.common.matchLabels" . }}
+{{- end -}}
+
+{{- define "cortex.configsDb.labels" -}}
+{{ include "cortex.configsDb.matchLabels" . }}
+{{ include "cortex.common.metaLabels" . }}
+{{- end -}}
+
+{{- define "cortex.configsDb.matchLabels" -}}
+component: {{ .Values.configsDb.name | quote }}
+{{ include "cortex.common.matchLabels" . }}
+{{- end -}}
+
 {{- define "cortex.consul.labels" -}}
 {{ include "cortex.consul.matchLabels" . }}
 {{ include "cortex.common.metaLabels" . }}
@@ -132,6 +152,40 @@ We truncate at 63 chars because some Kubernetes name fields are limited to this 
 {{- .Release.Name | trunc 63 | trimSuffix "-" -}}
 {{- else -}}
 {{- printf "%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Create a fully qualified configs name.
+We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
+*/}}
+{{- define "cortex.configs.fullname" -}}
+{{- if .Values.configs.fullnameOverride -}}
+{{- .Values.configs.fullnameOverride | trunc 63 | trimSuffix "-" -}}
+{{- else -}}
+{{- $name := default .Chart.Name .Values.nameOverride -}}
+{{- if contains $name .Release.Name -}}
+{{- printf "%s-%s" .Release.Name .Values.configs.name | trunc 63 | trimSuffix "-" -}}
+{{- else -}}
+{{- printf "%s-%s-%s" .Release.Name $name .Values.configs.name | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Create a fully qualified configs-db name.
+We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
+*/}}
+{{- define "cortex.configsDb.fullname" -}}
+{{- if .Values.configsDb.fullnameOverride -}}
+{{- .Values.configsDb.fullnameOverride | trunc 63 | trimSuffix "-" -}}
+{{- else -}}
+{{- $name := default .Chart.Name .Values.nameOverride -}}
+{{- if contains $name .Release.Name -}}
+{{- printf "%s-%s" .Release.Name .Values.configsDb.name | trunc 63 | trimSuffix "-" -}}
+{{- else -}}
+{{- printf "%s-%s-%s" .Release.Name $name .Values.configsDb.name | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 {{- end -}}
 {{- end -}}

@@ -1,0 +1,70 @@
+{{- if .Values.configsDb.enabled -}}
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  labels:
+    {{- include "cortex.configsDb.labels" . | nindent 4 }}
+  name: {{ template "cortex.configsDb.fullname" . }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "cortex.configsDb.matchLabels" . | nindent 6 }}
+  replicas: 1
+  {{- if .Values.configsDb.strategy }}
+  strategy:
+{{ toYaml .Values.configsDb.strategy | indent 4 }}
+  {{- end }}
+  template:
+    metadata:
+    {{- if .Values.configsDb.podAnnotations }}
+      annotations:
+{{ toYaml .Values.configsDb.podAnnotations | indent 8 }}
+    {{- end }}
+      labels:
+        {{- include "cortex.configsDb.labels" . | nindent 8 }}
+    spec:
+{{- if .Values.configsDb.schedulerName }}
+      schedulerName: "{{ .Values.configsDb.schedulerName }}"
+{{- end }}
+{{- if .Values.configsDb.priorityClassName }}
+      priorityClassName: "{{ .Values.configsDb.priorityClassName }}"
+{{- end }}
+      containers:
+        - name: {{ template "cortex.name" . }}-{{ .Values.configsDb.name }}
+          image: "{{ .Values.configsDb.image.repository }}:{{ .Values.configsDb.image.tag }}"
+          imagePullPolicy: {{ .Values.configsDb.image.pullPolicy }}
+          env:
+            - name: POSTGRES_DB
+              value: configs
+          ports:
+            - name: postgres
+              containerPort: {{ .Values.configsDb.service.port }}
+          # livenessProbe:
+          #   tcpSocket:
+          #     port: configsDb
+          #   initialDelaySeconds: 30
+          #   timeoutSeconds: 5
+          # readinessProbe:
+          #   tcpSocket:
+          #     port: configsDb
+          #   initialDelaySeconds: 5
+          #   timeoutSeconds: 1
+          resources:
+{{ toYaml .Values.configsDb.resources | indent 12 }}
+{{- if .Values.configsDb.affinity }}
+      affinity:
+{{ toYaml .Values.configsDb.affinity | indent 8 }}
+{{- end }}
+    {{- if .Values.configsDb.nodeSelector }}
+      nodeSelector:
+{{ toYaml .Values.configsDb.nodeSelector | indent 8 }}
+    {{- end }}
+    {{- if .Values.configsDb.securityContext }}
+      securityContext:
+{{ toYaml .Values.configsDb.securityContext | indent 8 }}
+    {{- end }}
+    {{- if .Values.configsDb.tolerations }}
+      tolerations:
+{{ toYaml .Values.configsDb.tolerations | indent 8 }}
+    {{- end }}
+{{- end }}

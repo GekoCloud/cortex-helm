@@ -1,0 +1,23 @@
+{{- if .Values.configsDb.enabled -}}
+apiVersion: v1
+kind: Service
+metadata:
+{{- if .Values.configsDb.service.annotations }}
+  annotations:
+{{ toYaml .Values.configsDb.service.annotations | indent 4 }}
+{{- end }}
+  labels:
+    {{- include "cortex.configsDb.labels" . | nindent 4 }}
+{{- if .Values.configsDb.service.labels }}
+{{ toYaml .Values.configsDb.service.labels | indent 4 }}
+{{- end }}
+  name: {{ template "cortex.configsDb.fullname" . }}
+spec:
+  clusterIP: None
+  ports:
+    - name: postgres
+      port: {{ .Values.configsDb.service.port }}
+      targetPort: postgres
+  selector:
+    {{- include "cortex.configsDb.matchLabels" . | nindent 4 }}
+{{- end }}

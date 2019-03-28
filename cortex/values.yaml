@@ -1,5 +1,116 @@
 # Default values for cortex.
 
+configs:
+  ## configs container name
+  ##
+  name: configs
+
+  ## configs container image
+  ##
+  image:
+    repository: quay.io/cortexproject/configs
+    tag: "{{ .Chart.AppVersion }}"
+    pullPolicy: IfNotPresent
+
+  ## configs priorityClassName
+  ##
+  priorityClassName: ""
+
+  ## Node tolerations for configs scheduling to nodes with taints
+  ## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/
+  ##
+  tolerations: []
+    # - key: "key"
+    #   operator: "Equal|Exists"
+    #   value: "value"
+    #   effect: "NoSchedule|PreferNoSchedule|NoExecute(1.6 only)"
+
+  ## Node labels for configs pod assignment
+  ## Ref: https://kubernetes.io/docs/user-guide/node-selection/
+  ##
+  nodeSelector: {}
+
+  ## Pod affinity
+  ##
+  affinity: {}
+
+  ## Use an alternate scheduler, e.g. "stork".
+  ## ref: https://kubernetes.io/docs/tasks/administer-cluster/configure-multiple-schedulers/
+  ##
+  # schedulerName:
+
+  ## configs Deployment Strategy type
+  # strategy:
+  #   rollingUpdate:
+  #     maxSurge: 0
+  #     maxUnavailable: 1
+
+  ## Annotations to be added to configs pods
+  ##
+  podAnnotations: {}
+
+  service:
+    port: 80
+    annotations: {}
+    labels: {}
+
+configsDb:
+  ## If false, configs-db will not be installed
+  ##
+  enabled: true
+
+  ## configs-db container name
+  ##
+  name: configs-db
+
+  ## configs-db container image
+  ##
+  image:
+    repository: postgres
+    tag: 9.6
+    pullPolicy: IfNotPresent
+
+  ## configs-db priorityClassName
+  ##
+  priorityClassName: ""
+
+  ## Node tolerations for configs-db scheduling to nodes with taints
+  ## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/
+  ##
+  tolerations: []
+    # - key: "key"
+    #   operator: "Equal|Exists"
+    #   value: "value"
+    #   effect: "NoSchedule|PreferNoSchedule|NoExecute(1.6 only)"
+
+  ## Node labels for configs-db pod assignment
+  ## Ref: https://kubernetes.io/docs/user-guide/node-selection/
+  ##
+  nodeSelector: {}
+
+  ## Pod affinity
+  ##
+  affinity: {}
+
+  ## Use an alternate scheduler, e.g. "stork".
+  ## ref: https://kubernetes.io/docs/tasks/administer-cluster/configure-multiple-schedulers/
+  ##
+  # schedulerName:
+
+  ## configs-db Deployment Strategy type
+  # strategy:
+  #   type: Recreate
+
+  ## Annotations to be added to configs-db pods
+  ##
+  podAnnotations:
+    prometheus.io.scrape: "false"
+
+  service:
+    port: 5432
+    annotations: {}
+    labels: {}
+
 consul:
   HttpPort: 8500
 
