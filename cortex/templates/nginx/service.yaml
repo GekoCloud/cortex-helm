@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: Service
+metadata:
+{{- if .Values.nginx.service.annotations }}
+  annotations:
+{{ toYaml .Values.nginx.service.annotations | indent 4 }}
+{{- end }}
+  labels:
+    {{- include "cortex.nginx.labels" . | nindent 4 }}
+{{- if .Values.nginx.service.labels }}
+{{ toYaml .Values.nginx.service.labels | indent 4 }}
+{{- end }}
+  name: {{ template "cortex.nginx.fullname" . }}
+spec:
+  type: NodePort
+  ports:
+    - name: http
+      port: {{ .Values.nginx.service.port }}
+      targetPort: http
+      nodePort: {{ .Values.nginx.service.nodePort }}
+  selector:
+    {{- include "cortex.nginx.matchLabels" . | nindent 4 }}

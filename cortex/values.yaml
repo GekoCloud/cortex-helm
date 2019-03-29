@@ -444,6 +444,64 @@ memcached:
     annotations: {}
     labels: {}
 
+nginx:
+  ## If false, nginx will not be installed
+  ##
+  enabled: true
+
+  ## nginx container name
+  ##
+  name: nginx
+
+  ## nginx container image
+  ##
+  image:
+    repository: nginx
+    tag: latest
+    pullPolicy: IfNotPresent
+
+  ## nginx priorityClassName
+  ##
+  priorityClassName: ""
+
+  ## Node tolerations for nginx scheduling to nodes with taints
+  ## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/
+  ##
+  tolerations: []
+    # - key: "key"
+    #   operator: "Equal|Exists"
+    #   value: "value"
+    #   effect: "NoSchedule|PreferNoSchedule|NoExecute(1.6 only)"
+
+  ## Node labels for nginx pod assignment
+  ## Ref: https://kubernetes.io/docs/user-guide/node-selection/
+  ##
+  nodeSelector: {}
+
+  ## Pod affinity
+  ##
+  affinity: {}
+
+  ## Use an alternate scheduler, e.g. "stork".
+  ## ref: https://kubernetes.io/docs/tasks/administer-cluster/configure-multiple-schedulers/
+  ##
+  # schedulerName:
+
+  ## nginx Deployment Strategy type
+  # strategy:
+  #   type: Recreate
+
+  ## Annotations to be added to nginx pods
+  ##
+  podAnnotations:
+    prometheus.io.scrape: "false"
+
+  service:
+    port: 80
+    nodePort: 30080
+    annotations: {}
+    labels: {}
+
 querier:
   ## querier container name
   ##

@@ -1,0 +1,72 @@
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  labels:
+    {{- include "cortex.nginx.labels" . | nindent 4 }}
+  name: {{ template "cortex.nginx.fullname" . }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "cortex.nginx.matchLabels" . | nindent 6 }}
+  replicas: 1
+  {{- if .Values.nginx.strategy }}
+  strategy:
+{{ toYaml .Values.nginx.strategy | indent 4 }}
+  {{- end }}
+  template:
+    metadata:
+    {{- if .Values.nginx.podAnnotations }}
+      annotations:
+{{ toYaml .Values.nginx.podAnnotations | indent 8 }}
+    {{- end }}
+      labels:
+        {{- include "cortex.nginx.labels" . | nindent 8 }}
+    spec:
+{{- if .Values.nginx.schedulerName }}
+      schedulerName: "{{ .Values.nginx.schedulerName }}"
+{{- end }}
+{{- if .Values.nginx.priorityClassName }}
+      priorityClassName: "{{ .Values.nginx.priorityClassName }}"
+{{- end }}
+      containers:
+        - name: {{ template "cortex.name" . }}-{{ .Values.nginx.name }}
+          image: "{{ .Values.nginx.image.repository }}:{{ tpl .Values.nginx.image.tag . }}"
+          imagePullPolicy: {{ .Values.nginx.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.nginx.service.port }}
+          volumeMounts:
+          - name: config-volume
+            mountPath: /etc/nginx
+          # livenessProbe:
+          #   httpGet:
+          #     path: /
+          #     port: http
+          # readinessProbe:
+          #   httpGet:
+          #     path: /ready
+          #     port: http
+          #   initialDelaySeconds: 15
+          #   timeoutSeconds: 1
+          resources:
+{{ toYaml .Values.nginx.resources | indent 12 }}
+      volumes:
+        - name: config-volume
+          configMap:
+            name: {{ template "cortex.nginx.fullname" . }}
+{{- if .Values.nginx.affinity }}
+      affinity:
+{{ toYaml .Values.nginx.affinity | indent 8 }}
+{{- end }}
+    {{- if .Values.nginx.nodeSelector }}
+      nodeSelector:
+{{ toYaml .Values.nginx.nodeSelector | indent 8 }}
+    {{- end }}
+    {{- if .Values.nginx.securityContext }}
+      securityContext:
+{{ toYaml .Values.nginx.securityContext | indent 8 }}
+    {{- end }}
+    {{- if .Values.nginx.tolerations }}
+      tolerations:
+{{ toYaml .Values.nginx.tolerations | indent 8 }}
+    {{- end }}

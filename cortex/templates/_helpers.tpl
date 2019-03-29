@@ -99,6 +99,16 @@ component: {{ .Values.memcached.name | quote }}
 {{ include "cortex.common.matchLabels" . }}
 {{- end -}}
 
+{{- define "cortex.nginx.labels" -}}
+{{ include "cortex.nginx.matchLabels" . }}
+{{ include "cortex.common.metaLabels" . }}
+{{- end -}}
+
+{{- define "cortex.nginx.matchLabels" -}}
+component: {{ .Values.nginx.name | quote }}
+{{ include "cortex.common.matchLabels" . }}
+{{- end -}}
+
 {{- define "cortex.querier.labels" -}}
 {{ include "cortex.querier.matchLabels" . }}
 {{ include "cortex.common.metaLabels" . }}
@@ -298,6 +308,23 @@ We truncate at 63 chars because some Kubernetes name fields are limited to this 
 {{- printf "%s-%s" .Release.Name .Values.memcached.name | trunc 63 | trimSuffix "-" -}}
 {{- else -}}
 {{- printf "%s-%s-%s" .Release.Name $name .Values.memcached.name | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Create a fully qualified nginx name.
+We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
+*/}}
+{{- define "cortex.nginx.fullname" -}}
+{{- if .Values.nginx.fullnameOverride -}}
+{{- .Values.nginx.fullnameOverride | trunc 63 | trimSuffix "-" -}}
+{{- else -}}
+{{- $name := default .Chart.Name .Values.nameOverride -}}
+{{- if contains $name .Release.Name -}}
+{{- printf "%s-%s" .Release.Name .Values.nginx.name | trunc 63 | trimSuffix "-" -}}
+{{- else -}}
+{{- printf "%s-%s-%s" .Release.Name $name .Values.nginx.name | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 {{- end -}}
 {{- end -}}
