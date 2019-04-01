@@ -1,0 +1,22 @@
+{{- if .Values.retrieval.enabled -}}
+apiVersion: v1
+kind: Service
+metadata:
+{{- if .Values.retrieval.service.annotations }}
+  annotations:
+{{ toYaml .Values.retrieval.service.annotations | indent 4 }}
+{{- end }}
+  labels:
+    {{- include "cortex.retrieval.labels" . | nindent 4 }}
+{{- if .Values.retrieval.service.labels }}
+{{ toYaml .Values.retrieval.service.labels | indent 4 }}
+{{- end }}
+  name: {{ template "cortex.retrieval.fullname" . }}
+spec:
+  ports:
+    - name: prometheus
+      port: {{ .Values.retrieval.service.port }}
+      targetPort: prometheus
+  selector:
+    {{- include "cortex.retrieval.matchLabels" . | nindent 4 }}
+{{- end }}

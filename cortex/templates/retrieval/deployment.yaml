@@ -1,0 +1,77 @@
+{{- if .Values.retrieval.enabled -}}
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  labels:
+    {{- include "cortex.retrieval.labels" . | nindent 4 }}
+  name: {{ template "cortex.retrieval.fullname" . }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "cortex.retrieval.matchLabels" . | nindent 6 }}
+  replicas: 1
+  {{- if .Values.retrieval.strategy }}
+  strategy:
+{{ toYaml .Values.retrieval.strategy | indent 4 }}
+  {{- end }}
+  template:
+    metadata:
+    {{- if .Values.retrieval.podAnnotations }}
+      annotations:
+{{ toYaml .Values.retrieval.podAnnotations | indent 8 }}
+    {{- end }}
+      labels:
+        {{- include "cortex.retrieval.labels" . | nindent 8 }}
+    spec:
+{{- if .Values.retrieval.schedulerName }}
+      schedulerName: "{{ .Values.retrieval.schedulerName }}"
+{{- end }}
+{{- if .Values.retrieval.priorityClassName }}
+      priorityClassName: "{{ .Values.retrieval.priorityClassName }}"
+{{- end }}
+      serviceAccountName: {{ template "cortex.retrieval.fullname" . }}
+      containers:
+        - name: {{ template "cortex.name" . }}-{{ .Values.retrieval.name }}
+          image: "{{ .Values.retrieval.image.repository }}:{{ tpl .Values.retrieval.image.tag . }}"
+          imagePullPolicy: {{ .Values.retrieval.image.pullPolicy }}
+          args:
+            - --config.file=/etc/prometheus/prometheus.yml
+          ports:
+            - name: prometheus
+              containerPort: {{ .Values.retrieval.service.port }}
+          volumeMounts:
+          - name: config-volume
+            mountPath: /etc/prometheus
+          # livenessProbe:
+          #   httpGet:
+          #     path: /
+          #     port: http
+          # readinessProbe:
+          #   httpGet:
+          #     path: /ready
+          #     port: http
+          #   initialDelaySeconds: 15
+          #   timeoutSeconds: 1
+          resources:
+{{ toYaml .Values.retrieval.resources | indent 12 }}
+      volumes:
+        - name: config-volume
+          configMap:
+            name: {{ template "cortex.retrieval.fullname" . }}
+{{- if .Values.retrieval.affinity }}
+      affinity:
+{{ toYaml .Values.retrieval.affinity | indent 8 }}
+{{- end }}
+    {{- if .Values.retrieval.nodeSelector }}
+      nodeSelector:
+{{ toYaml .Values.retrieval.nodeSelector | indent 8 }}
+    {{- end }}
+    {{- if .Values.retrieval.securityContext }}
+      securityContext:
+{{ toYaml .Values.retrieval.securityContext | indent 8 }}
+    {{- end }}
+    {{- if .Values.retrieval.tolerations }}
+      tolerations:
+{{ toYaml .Values.retrieval.tolerations | indent 8 }}
+    {{- end }}
+{{- end }}

@@ -129,6 +129,16 @@ component: {{ .Values.queryFrontend.name | quote }}
 {{ include "cortex.common.matchLabels" . }}
 {{- end -}}
 
+{{- define "cortex.retrieval.labels" -}}
+{{ include "cortex.retrieval.matchLabels" . }}
+{{ include "cortex.common.metaLabels" . }}
+{{- end -}}
+
+{{- define "cortex.retrieval.matchLabels" -}}
+component: {{ .Values.retrieval.name | quote }}
+{{ include "cortex.common.matchLabels" . }}
+{{- end -}}
+
 {{- define "cortex.ruler.labels" -}}
 {{ include "cortex.ruler.matchLabels" . }}
 {{ include "cortex.common.metaLabels" . }}
@@ -359,6 +369,23 @@ We truncate at 63 chars because some Kubernetes name fields are limited to this 
 {{- printf "%s-%s" .Release.Name .Values.queryFrontend.name | trunc 63 | trimSuffix "-" -}}
 {{- else -}}
 {{- printf "%s-%s-%s" .Release.Name $name .Values.queryFrontend.name | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Create a fully qualified retrieval name.
+We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
+*/}}
+{{- define "cortex.retrieval.fullname" -}}
+{{- if .Values.retrieval.fullnameOverride -}}
+{{- .Values.retrieval.fullnameOverride | trunc 63 | trimSuffix "-" -}}
+{{- else -}}
+{{- $name := default .Chart.Name .Values.nameOverride -}}
+{{- if contains $name .Release.Name -}}
+{{- printf "%s-%s" .Release.Name .Values.retrieval.name | trunc 63 | trimSuffix "-" -}}
+{{- else -}}
+{{- printf "%s-%s-%s" .Release.Name $name .Values.retrieval.name | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 {{- end -}}
 {{- end -}}

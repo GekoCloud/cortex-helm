@@ -1,3 +1,4 @@
+{{- if .Values.nginx.enabled -}}
 apiVersion: apps/v1beta2
 kind: Deployment
 metadata:
@@ -70,3 +71,4 @@ spec:
       tolerations:
 {{ toYaml .Values.nginx.tolerations | indent 8 }}
     {{- end }}
+{{- end }}

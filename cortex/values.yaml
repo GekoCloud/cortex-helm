@@ -611,6 +611,68 @@ queryFrontend:
     annotations: {}
     labels: {}
 
+retrieval:
+  ## If true, retrieval RBAC resources will be created
+  ##
+  rbac:
+    create: true
+
+  ## If false, retrieval will not be installed
+  ##
+  enabled: true
+
+  ## retrieval container name
+  ##
+  name: retrieval
+
+  ## retrieval container image
+  ##
+  image:
+    repository: prom/prometheus
+    tag: v2.8.0
+    pullPolicy: IfNotPresent
+
+  ## retrieval priorityClassName
+  ##
+  priorityClassName: ""
+
+  ## Node tolerations for retrieval scheduling to nodes with taints
+  ## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/
+  ##
+  tolerations: []
+    # - key: "key"
+    #   operator: "Equal|Exists"
+    #   value: "value"
+    #   effect: "NoSchedule|PreferNoSchedule|NoExecute(1.6 only)"
+
+  ## Node labels for retrieval pod assignment
+  ## Ref: https://kubernetes.io/docs/user-guide/node-selection/
+  ##
+  nodeSelector: {}
+
+  ## Pod affinity
+  ##
+  affinity: {}
+
+  ## Use an alternate scheduler, e.g. "stork".
+  ## ref: https://kubernetes.io/docs/tasks/administer-cluster/configure-multiple-schedulers/
+  ##
+  # schedulerName:
+
+  ## retrieval Deployment Strategy type
+  # strategy:
+  #   type: Recreate
+
+  ## Annotations to be added to retrieval pods
+  ##
+  podAnnotations:
+    prometheus.io.scrape: "false"
+
+  service:
+    port: 9090
+    annotations: {}
+    labels: {}
+
 ruler:
   ## ruler container name
   ##
